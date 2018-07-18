@@ -14,7 +14,8 @@ class TranslatorInContextMenu {
     _createEventListeners() {
         window.addEventListener('contextmenu', (event) => {
             event.preventDefault();
-            this.showMenu(event);
+            const {pageX, pageY} = event;
+            this.showMenu(pageX, pageY);
         });
         document.addEventListener('click', (event) => {
             if (!this.menuIsShown || event.which == 3) return;
@@ -49,7 +50,7 @@ class TranslatorInContextMenu {
     _generateTranslateMenuItem(selectedText) {
         if (!selectedText) return;
         const siteLink = 'https://translate.google.com.ua/#en/uk/';
-        const link = `${siteLink}${selectedText.replace(' ', '%20')}`;
+        const link = `${siteLink}${selectedText.replace(/ /g, '%20')}`;
         return this._generateMenuItem({text: `Translate`, link}, '_blank');
     }
 
@@ -66,8 +67,7 @@ class TranslatorInContextMenu {
         }
     }
 
-    showMenu(event) {
-        const {pageX, pageY} = event;
+    showMenu(pageX = 0, pageY = 0) {
         const {template} = this.menuData;
         this._toggleTranslateMenuItem();
 
