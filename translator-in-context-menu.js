@@ -1,7 +1,7 @@
 class TranslatorInContextMenu {
     constructor(items) {
-        this.menuData = null;
         this.items = items;
+        this.menuData = null;
         this._translateItemTemplate = null;
         this.menuIsShown = false;
     }
@@ -56,6 +56,7 @@ class TranslatorInContextMenu {
     _toggleTranslateMenuItem() {
         const selectedText = this.getSelectedText().trim();
         const {template} = this.menuData;
+
         if (selectedText && !template.contains(this._translateItemTemplate)) {
             this._translateItemTemplate = this._generateTranslateMenuItem(selectedText);
             template.appendChild(this._translateItemTemplate);
@@ -67,11 +68,12 @@ class TranslatorInContextMenu {
 
     showMenu(event) {
         const {pageX, pageY} = event;
-        this._toggleTranslateMenuItem();
-        this.menuData = Object.assign({}, this.menuData, {pageX, pageY});
         const {template} = this.menuData;
+        this._toggleTranslateMenuItem();
+
         template.style.top = pageY + 'px';
         template.style.left = pageX + 'px';
+
         document.body.appendChild(this.menuData['template']);
         this.menuIsShown = true;
     }
@@ -79,12 +81,13 @@ class TranslatorInContextMenu {
     hideMenu() {
         if (!this.menuIsShown) return;
         const {template} = this.menuData;
-        document.body.removeChild(template);
-        if (template.contains(this._translateItemTemplate)) {
-            template.removeChild(this._translateItemTemplate);
-        }
-        if (this._translateItemTemplate) this._translateItemTemplate = null;
+
         this.menuIsShown = false;
+        document.body.removeChild(template);
+
+        if (!this._translateItemTemplate) return;
+        template.removeChild(this._translateItemTemplate);
+        this._translateItemTemplate = null;
     }
 
     getSelectedText() {
