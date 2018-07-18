@@ -2,58 +2,39 @@ class Translator {
     constructor(items) {
         this.menuData = null;
         this.items = items;
-        this.translateItemTemplate = null;
+        this._translateItemTemplate = null;
         this.menuIsShown = false;
     }
 
     init() {
-        this.menuData = {template: this.generateMenuTemplate()};
-        this.createContextMenuEventListener();
+        this.menuData = {template: this._generateMenuTemplate()};
+        this._createEventListeners();
+    }
+
+    _createEventListeners() {
+        window.addEventListener('contextmenu', (event) => {
+            event.preventDefault();
+            this.showMenu(event);
+        });
         document.addEventListener('click', (event) => {
             if (!this.menuData && event.which == 3) return;
             this.hideMenu();
         });
     }
 
-    createContextMenuEventListener() {
-        window.addEventListener('contextmenu', (event) => {
-            event.preventDefault();
-            this.newShowMenu(event);
-        });
-    }
-
-    _getMenuTemplate() {
-        let template = ``;
-        let items = this.items.slice();
-
-        const selectedText = this.getSelectedText();
-
-        if (selectedText) {
-            const link = `https://translate.google.com.ua/#en/uk/${selectedText.replace(' ', '%20')}`;
-            items.push({text: `Translate`, link})
-        }
-        items.forEach(el => {
-            template += `<li><a target="_blank" href="${el['link']}">${el['text']}</a></li>`
-        });
-
-        return `<ul style="margin: 0;padding: 5px 10px;list-style: none;">${template}</ul>`;
-    }
-
-    generateMenuTemplate() {
+    _generateMenuTemplate() {
         let items = this.items.slice();
         let menuBox = document.createElement('UL');
         menuBox.style = `position:fixed;
-							margin:0;
-							padding: 5px 10px;
-							top: 100px;
-							left: 100px;
-							list-style: none;
-							background: yellow;`;
-        items.forEach(el => menuBox.appendChild(this.generateMenuItem(el)));
+						 margin:0;
+						 padding: 5px 10px;
+						 list-style: none;
+						 background: yellow;`;
+        items.forEach(el => menuBox.appendChild(this._generateMenuItem(el)));
         return menuBox;
     }
 
-    generateMenuItem(el, target) {
+    _generateMenuItem(el, target) {
         const itemTemplate = document.createElement('LI');
         const linkTemplate = document.createElement('A');
         const text = document.createTextNode(el['text']);
@@ -65,42 +46,28 @@ class Translator {
         return itemTemplate;
     }
 
-    generateTranslateMenuItem(selectedText) {
+    _generateTranslateMenuItem(selectedText) {
         if (!selectedText) return;
         const siteLink = 'https://translate.google.com.ua/#en/uk/';
         const link = `${siteLink}${selectedText.replace(' ', '%20')}`;
-        return this.generateMenuItem({text: `Translate`, link}, '_blank');
+        return this._generateMenuItem({text: `Translate`, link}, '_blank');
     }
 
-    toggleTranslateMenuItem() {
-        const selectedText = this.getSelectedText();
+    _toggleTranslateMenuItem() {
+        const selectedText = this.getSelectedText().trim();
         const {template} = this.menuData;
-        if (selectedText && !template.contains(this.translateItemTemplate)) {
-            this.translateItemTemplate = this.generateTranslateMenuItem(selectedText);
-            template.appendChild(this.translateItemTemplate);
-        } else if (!selectedText && template.contains(this.translateItemTemplate)) {
-            template.removeChild(this.translateItemTemplate);
-            this.translateItemTemplate = null;
+        if (selectedText && !template.contains(this._translateItemTemplate)) {
+            this._translateItemTemplate = this._generateTranslateMenuItem(selectedText);
+            template.appendChild(this._translateItemTemplate);
+        } else if (!selectedText && template.contains(this._translateItemTemplate)) {
+            template.removeChild(this._translateItemTemplate);
+            this._translateItemTemplate = null;
         }
     }
 
-
-    _createMenu(pageX, pageY) {
-        if (this.menuData) this._removeMenu();
-        let template = document.createElement("div");
-        template.style = `position:fixed;
-							top: ${pageY}px;
-							left: ${pageX}px;
-							padding: 0 10px;
-							color: red;
-							background: yellow;`;
-        template.innerHTML = this._getMenuTemplate();
-        this.menuData = {template, pageX, pageY};
-    }
-
-    newShowMenu(event) {
+    showMenu(event) {
         const {pageX, pageY} = event;
-        this.toggleTranslateMenuItem();
+        this._toggleTranslateMenuItem();
         this.menuData = Object.assign({}, this.menuData, {pageX, pageY});
         const {template} = this.menuData;
         template.style.top = pageY + 'px';
@@ -113,31 +80,12 @@ class Translator {
         if (!this.menuIsShown) return;
         const {template} = this.menuData;
         document.body.removeChild(template);
-        if (template.contains(this.translateItemTemplate)) {
-            template.removeChild(this.translateItemTemplate);
+        if (template.contains(this._translateItemTemplate)) {
+            template.removeChild(this._translateItemTemplate);
         }
-        if (this.translateItemTemplate) this.translateItemTemplate = null;
+        if (this._translateItemTemplate) this._translateItemTemplate = null;
         this.menuIsShown = false;
     }
-
-    showMenu(event) {
-        this._createMenu(event.pageX, event.pageY);
-        document.body.appendChild(this.menuData['template']);
-    }
-
-    hideMenuOnClickOutside(pageX, pageY) {
-        const {clientWidth: width, clientHeight: height} = this.menuData.template;
-        const {pageX: x, pageY: y} = this.menuData;
-        if (pageX > x && pageX < x + width && pageY > y && pageY < y + height) return;
-        this._removeMenu();
-    }
-
-
-    _removeMenu() {
-        document.body.removeChild(this.menuData['template']);
-        this.menuData = null;
-    }
-
 
     getSelectedText() {
         if (window.getSelection) {
@@ -148,21 +96,3 @@ class Translator {
         return;
     }
 }
-
-let items = [{
-    text: 'item 1',
-    link: '#'
-}, {
-    text: 'item 2',
-    link: '#'
-}, {
-    text: 'item 3',
-    link: '#'
-}];
-
-function init() {
-    let transl = new Translator(items);
-    transl.init()
-}
-
-document.addEventListener('DOMContentLoaded', init, false);
