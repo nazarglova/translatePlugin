@@ -17,7 +17,7 @@ class TranslatorInContextMenu {
             this.showMenu(event);
         });
         document.addEventListener('click', (event) => {
-            if (!this.menuData && event.which == 3) return;
+            if (!this.menuIsShown || event.which == 3) return;
             this.hideMenu();
         });
     }
