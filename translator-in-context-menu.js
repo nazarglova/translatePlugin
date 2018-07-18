@@ -1,4 +1,4 @@
-class Translator {
+class TranslatorInContextMenu {
     constructor(items) {
         this.menuData = null;
         this.items = items;

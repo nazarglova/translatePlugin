@@ -10,8 +10,8 @@ function init() {
         link: '#'
     }];
 
-    let translator = new Translator(items);
-    translator.init();
+    let translatorInContextMenu = new TranslatorInContextMenu(items);
+    translatorInContextMenu.init();
 }
 
 document.addEventListener('DOMContentLoaded', init, false);
