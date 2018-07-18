@@ -12,13 +12,7 @@ class Translator {
         document.addEventListener('click', (event) => {
             if (!this.menuData && event.which == 3) return;
             this.hideMenu();
-            // this.hideMenuOnClickOutside(event.pageX, event.pageY);
         });
-
-        // window.addEventListener('keyup', (event) => {
-        //     event.preventDefault();
-        //     this.newShowMenu(event);
-        // });
     }
 
     createContextMenuEventListener() {
@@ -48,6 +42,13 @@ class Translator {
     generateMenuTemplate() {
         let items = this.items.slice();
         let menuBox = document.createElement('UL');
+        menuBox.style = `position:fixed;
+							margin:0;
+							padding: 5px 10px;
+							top: 100px;
+							left: 100px;
+							list-style: none;
+							background: yellow;`;
         items.forEach(el => menuBox.appendChild(this.generateMenuItem(el)));
         return menuBox;
     }
@@ -102,7 +103,8 @@ class Translator {
         this.toggleTranslateMenuItem();
         this.menuData = Object.assign({}, this.menuData, {pageX, pageY});
         const {template} = this.menuData;
-        
+        template.style.top = pageY + 'px';
+        template.style.left = pageX + 'px';
         document.body.appendChild(this.menuData['template']);
         this.menuIsShown = true;
     }
